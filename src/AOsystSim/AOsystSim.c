@@ -1042,9 +1042,9 @@ int_fast8_t AOsystSim_extremeAO_contrast_sim()
     exaosimconf[0].lambda0 = 0.55e-6;
     exaosimconf[0].lambdai = 1.6e-6;
     exaosimconf[0].lambdawfs = 0.8e-6;
-    exaosimconf[0].D = 8.0;
+    exaosimconf[0].D = 30.0;
     exaosimconf[0].r0 = 0.15;
-    exaosimconf[0].windspeed = 8.0;
+    exaosimconf[0].windspeed = 10.0;
     exaosimconf[0].betapWFS = sqrt(2.0);
     exaosimconf[0].betaaWFS = sqrt(2.0);
     exaosimconf[0].betapWFSsci = 2.0;
@@ -1072,6 +1072,17 @@ int_fast8_t AOsystSim_extremeAO_contrast_sim()
     exaosimconf[0].CN2layer_coeff[4] = 0.3350;
     exaosimconf[0].CN2layer_h[5] = 16000.0;
     exaosimconf[0].CN2layer_coeff[5] = 0.1360;
+
+
+// 8-m telescope
+	exaosimconf[0].D = 8.0;
+	exaosimconf[0].windspeed = 8.0;
+	WFStlim = 0.002;
+
+// 30-m telescope
+	exaosimconf[0].D = 30.0;
+	exaosimconf[0].windspeed = 10.0;
+	WFStlim = 0.0002;
 
 
 		// refraction
