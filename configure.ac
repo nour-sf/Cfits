@@ -379,8 +379,8 @@ src/COREMOD_arith/Makefile \
 src/COREMOD_iofits/Makefile \
 src/COREMOD_memory/Makefile \
 src/COREMOD_tools/Makefile \
-src/info/Makefile \
 src/fft/Makefile \
+src/info/Makefile \
 src/statistic/Makefile \
 src/linopt_imtools/Makefile \
 src/image_gen/Makefile \

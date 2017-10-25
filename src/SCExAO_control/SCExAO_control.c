@@ -237,6 +237,11 @@ int_fast8_t SCExAOcontrol_vib_mergeData_cli()
 
 
 
+void __attribute__ ((constructor)) libinit_SCExAO_control()
+{
+	init_SCExAO_control();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
 
 
 

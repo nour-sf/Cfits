@@ -75,6 +75,11 @@ typedef uint_fast8_t BOOL;
 
 
 
+#define DATA_NB_MAX_COMMAND 1000
+#define DATA_NB_MAX_MODULE 100
+
+
+
 //Need to install process with setuid.  Then, so you aren't running privileged all the time do this:
 extern uid_t euid_real;
 extern uid_t euid_called;
@@ -191,6 +196,15 @@ typedef struct
     int signal_HUP;
     int signal_PIPE;
     
+    uid_t ruid; // Real UID (= user launching process at startup)
+	uid_t euid; // Effective UID (= owner of executable at startup)
+	uid_t suid; // Saved UID (= owner of executable at startup)
+	// system permissions are set by euid
+	// at startup, euid = owner of executable (meant to be root)
+	// -> we first drop privileges by setting euid to ruid
+	// when root privileges needed, we set euid <- suid
+	// when reverting to user privileges : euid <- ruid
+    
     int Debug;
     int quiet;
     int overwrite;		// automatically overwrite FITS files
@@ -207,8 +221,10 @@ typedef struct
     char processname[100];
     char fifoname[100];
     uint_fast16_t NBcmd;
+    
     long NB_MAX_COMMAND;
-    CMD *cmd;
+    CMD cmd[1000];
+    
     int parseerror; // 1 if error, 0 otherwise
     long cmdNBarg;  // number of arguments in last command line
     CMDARGTOKEN cmdargtoken[NB_ARG_MAX];
@@ -216,9 +232,9 @@ typedef struct
     long calctmp_imindex; // used to create temporary images
     int CMDexecuted; // 0 if command has not been executed, 1 otherwise
     long NBmodule;
+    
     long NB_MAX_MODULE;
-    MODULE *module;
-
+    MODULE module[100];
 
     // shared memory default
     int SHARED_DFT;

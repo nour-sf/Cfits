@@ -1,7 +1,7 @@
 #SUFFIXES = .c .h .y .l
 
 bin_PROGRAMS = cfitsTK
-cfitsTK_SOURCES = CLIcore.c CLIcore.h initmodules.c initmodules.h calc_bison.y calc_flex.l calc.h
+cfitsTK_SOURCES = CLIcore.c CLIcore.h calc_bison.y calc_flex.l calc.h
 cfitsTK_CPPFLAGS = -I@abs_top_srcdir@/src -DCONFIGDIR=\"@abs_top_srcdir@/config\" -DSOURCEDIR=\"@abs_top_srcdir@/src\" -DABSSRCTOPDIR=\"@abs_top_srcdir@\" -fopenmp -ldl
 
 ACLOCAL_AMFLAGS = -I m4
@@ -39,10 +39,6 @@ SUBDIRS += SCExAO_control
 cfitsTK_LDADD += SCExAO_control/libscexaocontrol.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/SCExAO_control
 
-SUBDIRS += cudacomp
-cfitsTK_LDADD += cudacomp/libcudacomp.la
-cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/cudacomp
-
 SUBDIRS += AtmosphericTurbulence
 cfitsTK_LDADD += AtmosphericTurbulence/libatmosphericturbulence.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/AtmosphericTurbulence
@@ -54,6 +50,12 @@ cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/AtmosphereModel
 SUBDIRS += psf
 cfitsTK_LDADD += psf/libpsf.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/psf
+
+
+
+SUBDIRS += AOloopControl
+cfitsTK_LDADD += AOloopControl/libaoloopcontrol.la
+cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/AOloopControl
 
 SUBDIRS += FPAOloopControl
 cfitsTK_LDADD += FPAOloopControl/libfpaoloopcontrol.la
@@ -83,9 +85,7 @@ SUBDIRS += AOloopControl_compTools
 cfitsTK_LDADD += AOloopControl_compTools/libaoloopcontrolcomptools.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/AOloopControl_compTools
 
-SUBDIRS += AOloopControl
-cfitsTK_LDADD += AOloopControl/libaoloopcontrol.la
-cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/AOloopControl
+
 
 SUBDIRS += AOsystSim
 cfitsTK_LDADD += AOsystSim/libaosystsim.la
@@ -147,17 +147,21 @@ SUBDIRS += linopt_imtools
 cfitsTK_LDADD += linopt_imtools/liblinoptimtools.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/linopt_imtools
 
+SUBDIRS += cudacomp
+cfitsTK_LDADD += cudacomp/libcudacomp.la
+cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/cudacomp
+
 SUBDIRS += statistic
 cfitsTK_LDADD += statistic/libstatistic.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/statistic
 
-SUBDIRS += fft
-cfitsTK_LDADD += fft/libfft.la
-cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/fft
-
 SUBDIRS += info
 cfitsTK_LDADD += info/libinfo.la
 cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/info
+
+SUBDIRS += fft
+cfitsTK_LDADD += fft/libfft.la
+cfitsTK_CPPFLAGS += -I@abs_top_srcdir@/src/fft
 
 
 

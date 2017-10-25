@@ -56,6 +56,16 @@ int_fast8_t Fresnel_propagate_wavefront_cli()
 
 
 
+
+void __attribute__ ((constructor)) libinit_WFpropagate()
+{
+	init_WFpropagate();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
+
 int_fast8_t init_WFpropagate()
 {
   strcpy(data.module[data.NBmodule].name, __FILE__);

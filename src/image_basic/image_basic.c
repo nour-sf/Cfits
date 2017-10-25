@@ -280,6 +280,14 @@ int_fast8_t IMAGE_BASIC_streamrecord_cli()
 
 
 
+void __attribute__ ((constructor)) libinit_image_basic()
+{
+	init_image_basic();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
 
 
 
@@ -4206,9 +4214,9 @@ long IMAGE_BASIC_streamfeed(const char *IDname, const char *streamname, float fr
    
     schedpar.sched_priority = RT_priority;
     #ifndef __MACH__
-    r = seteuid(euid_called); //This goes up to maximum privileges
+    r = seteuid(data.euid); //This goes up to maximum privileges
     sched_setscheduler(0, SCHED_FIFO, &schedpar); //other option is SCHED_RR, might be faster
-    r = seteuid(euid_real);//Go back to normal privileges
+    r = seteuid(data.ruid);//Go back to normal privileges
     #endif
 
     ID = image_ID(IDname);

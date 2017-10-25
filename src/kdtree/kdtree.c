@@ -114,6 +114,14 @@ static void free_resnode(struct res_node*);
 
 
 
+void __attribute__ ((constructor)) libinit_kdtree()
+{
+	init_kdtree();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
 
 int init_kdtree()
 {

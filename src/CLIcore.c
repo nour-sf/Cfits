@@ -29,6 +29,8 @@
 #include <pthread.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <dirent.h> 
+
 
 //#include <pthread_np.h>
 
@@ -81,7 +83,7 @@ static int clock_gettime(int clk_id, struct mach_timespec *t){
 #include <gsl/gsl_rng.h> // for random numbers
 #include <fitsio.h>
 
-#include "initmodules.h"
+//#include "initmodules.h"
 
 #include "ImageStreamIO/ImageStreamIO.h"
 #include "00CORE/00CORE.h"
@@ -138,9 +140,7 @@ char BuildFile[200]; // file name for source
 char BuildDate[200];
 char BuildTime[200];
 
-uid_t euid_real;
-uid_t euid_called;
-uid_t suid;
+
 
 uint8_t TYPESIZE[32];
 
@@ -153,6 +153,7 @@ int C_ERRNO;
 int Verbose = 0; 
 int Listimfile = 0;
 DATA data;
+
 
 char *line;
 int rlquit = false;
@@ -204,6 +205,7 @@ static int_fast8_t help();
 static int_fast8_t list_commands();
 static int_fast8_t list_commands_module(char *modulename);
 static int_fast8_t load_module_shared(char *modulename);
+static int_fast8_t load_module_shared_ALL();
 static int_fast8_t help_command(char *cmdkey);
 
 
@@ -722,9 +724,6 @@ int_fast8_t main(int argc, char *argv[])
     strcpy(data.processname, argv[0]);
 
 
-
-
-
     TYPESIZE[_DATATYPE_UINT8] = SIZEOF_DATATYPE_UINT8;
     TYPESIZE[_DATATYPE_INT8] = SIZEOF_DATATYPE_INT8;
     TYPESIZE[_DATATYPE_UINT16] = SIZEOF_DATATYPE_UINT16;
@@ -786,10 +785,9 @@ int_fast8_t main(int argc, char *argv[])
     // owner=root mode=4755
 
 #ifndef __MACH__
-    getresuid(&euid_real, &euid_called, &suid);
-
+	getresuid(&data.ruid, &data.euid, &data.suid);
     //This sets it to the privileges of the normal user
-    r = seteuid(euid_real);
+    r = seteuid(data.ruid);
 #endif
 
 
@@ -845,6 +843,11 @@ int_fast8_t main(int argc, char *argv[])
     // warm up
     //for(i=0; i<10; i++)
     //    v1 = gsl_rng_uniform (data.rndgen);
+
+
+
+	// LOAD MODULES
+	load_module_shared_ALL();
 
 
     /*--------------------------------------------------
@@ -1010,6 +1013,8 @@ int_fast8_t main(int argc, char *argv[])
 
         if(data.CMDexecuted==0)
             printf("Command not found, or command with no effect\n");
+    
+		//AOloopControl_bogusfunc();
     }
 
 
@@ -1164,8 +1169,8 @@ void main_init()
   
 
   // initialize modules
-  data.NB_MAX_MODULE = 100;
-  data.module = (MODULE*) malloc(sizeof(MODULE)*data.NB_MAX_MODULE);
+  data.NB_MAX_MODULE = DATA_NB_MAX_MODULE;
+//  data.module = (MODULE*) malloc(sizeof(MODULE)*data.NB_MAX_MODULE);
   
 
   // initialize commands
@@ -1175,8 +1180,10 @@ void main_init()
       printf("Allocating cmd array : %ld\n", sizeof(CMD)*data.NB_MAX_COMMAND);
       fflush(stdout);
     }
-  data.cmd = (CMD*) malloc(sizeof(CMD)*data.NB_MAX_COMMAND);
-  data.NBcmd = 0;
+ 
+	data.NB_MAX_COMMAND = DATA_NB_MAX_COMMAND;
+ // data.cmd = (CMD*) malloc(sizeof(CMD)*data.NB_MAX_COMMAND);
+//  data.NBcmd = 0;
   
   data.cmdNBarg = 0;
 
@@ -1375,7 +1382,7 @@ void main_init()
 
   
 
-  init_modules();
+//  init_modules();
 
   printf("LOADED: %ld modules, %ld commands\n", data.NBmodule, data.NBcmd);
   
@@ -1387,7 +1394,7 @@ void main_free()
   // Free 
   free(data.image);
   free(data.variable);
-  free(data.cmd);
+//  free(data.cmd);
   gsl_rng_free (data.rndgen);
   
 }
@@ -1656,12 +1663,12 @@ int command_line( int argc, char **argv)
             schedpar.sched_priority = atoi(optarg);
             printf("RUNNING WITH RT PRIORITY = %d\n", schedpar.sched_priority);
             #ifndef __MACH__
-            //r = seteuid(euid_called); //This goes up to maximum privileges
-            if(seteuid(euid_called) != 0) //This goes up to maximum privileges
+            
+            if(seteuid(data.euid) != 0) //This goes up to maximum privileges
 				printERROR(__FILE__, __func__, __LINE__, "seteuid() returns non-zero value");            
             sched_setscheduler(0, SCHED_FIFO, &schedpar); //other option is SCHED_RR, might be faster
-//            r = seteuid(euid_real);//Go back to normal privileges
-			if(seteuid(euid_real) != 0) //Go back to normal privileges
+
+			if(seteuid(data.ruid) != 0) //Go back to normal privileges
 				printERROR(__FILE__, __func__, __LINE__, "seteuid() returns non-zero value");
             #endif
             break;
@@ -1786,46 +1793,138 @@ static int_fast8_t load_module_shared(char *modulename)
     int (*libinitfunc) ();
     char *error;
     char initfuncname[200];
-
-
+    
 
     sprintf(modulenameLC, "%s", modulename);
+    
     for(n=0; n<strlen(modulenameLC); n++)
     {
         c = modulenameLC[n];
         modulenameLC[n] = tolower(c);
     }
 
-    sprintf(libname, "src/%s/.libs/lib%s.so", modulename, modulenameLC);
+    sprintf(libname, "%s/../lib/lib%s.so", SOURCEDIR, modulenameLC);
     printf("libname = %s\n", libname);
 
 
-    printf("[%5d] Loading object \"%s\"\n", DLib_index, libname);
+    printf("[%5d] Loading shared object \"%s\"\n", DLib_index, libname);
+
+
+    DLib_handle[DLib_index] = dlopen(libname, RTLD_LAZY|RTLD_GLOBAL);
+    if (!DLib_handle[DLib_index]) {
+        fprintf(stderr, "%s\n", dlerror());
+        //exit(EXIT_FAILURE);
+    }
+	else
+	{
+		dlerror();
+		// increment number of libs dynamically loaded
+		DLib_index ++;
+	}
+	
+    return 0;
+}
+
+
+
+
+
+static int_fast8_t load_module_shared_ALL()
+{
+    char libname[200];
+    char modulenameLC[200];
+    char c;
+    int n;
+    int (*libinitfunc) ();
+    char *error;
+    char initfuncname[200];
+    
+    char dirname[200];
+    DIR           *d;
+    struct dirent *dir;
+
+    int iter;
+    int loopOK;
+    int itermax;
+    
+    sprintf(dirname, "%s/../lib", SOURCEDIR);
+
+    loopOK = 0;
+    iter = 0;
+    itermax=4;
+    while ((loopOK == 0)&&(iter<itermax))
+    {
+		loopOK = 1;
+		d = opendir(dirname);
+		if (d)
+		{
+		while ((dir = readdir(d)) != NULL)
+		{
+			char *dot = strrchr(dir->d_name, '.');
+			if (dot && !strcmp(dot, ".so"))
+				{
+					sprintf(libname, "%s/../lib/%s", SOURCEDIR, dir->d_name);
+					//printf("LOADING shared object  %40s -> %s\n", dir->d_name, libname);
+				
+				
+					DLib_handle[DLib_index] = dlopen(libname, RTLD_LAZY|RTLD_GLOBAL);
+					if (!DLib_handle[DLib_index]) {
+						fprintf(stderr, "Pass # %d   %s\n", iter, dlerror());
+						//exit(EXIT_FAILURE);
+						loopOK = 0;
+					}
+					else
+					{
+						dlerror();
+						// increment number of libs dynamically loaded
+						DLib_index ++;
+					}
+				
+				
+				}
+		}
+
+		closedir(d);
+		}
+		if(loopOK == 1)
+			printf("Pass #%d successful\n", iter);
+		iter++;
+	}
+
+	if(loopOK==1)
+		printf("All libraries successfully loaded\n");
+
+
+/*
+    sprintf(modulenameLC, "%s", modulename);
+    
+    for(n=0; n<strlen(modulenameLC); n++)
+    {
+        c = modulenameLC[n];
+        modulenameLC[n] = tolower(c);
+    }
+
+	
+
+    sprintf(libname, "%s/../lib/lib%s.so", SOURCEDIR, modulenameLC);
+    printf("libname = %s\n", libname);
+
+
+    printf("[%5d] Loading shared object \"%s\"\n", DLib_index, libname);
 
 
     DLib_handle[DLib_index] = dlopen(libname, RTLD_LAZY);
     if (!DLib_handle[DLib_index]) {
         fprintf(stderr, "%s\n", dlerror());
-        exit(EXIT_FAILURE);
     }
-
-    dlerror();
-
-	sprintf(initfuncname, "initlib_%s", modulenameLC);
-    libinitfunc = dlsym(DLib_handle[DLib_index], initfuncname);
-    if ((error = dlerror()) != NULL) {
-        fputs(error, stderr);
-    exit(1);
+	else
+	{
+		dlerror();
+		DLib_index ++;
 	}
-
-	(*libinitfunc)();
-
-	// increment number of libs dynamically loaded
-	DLib_index ++;
-
+	*/
     return 0;
 }
-
 
 
 

@@ -66,10 +66,10 @@ int_fast8_t TransitLC_run_cli()
 
 
 
-int initlib_transitlc()
+void __attribute__ ((constructor)) initlib_TransitLC()
 {
-	printf("Initializing library TransitLC\n");
 	init_TransitLC();
+	printf(" ...... Loading module %s\n", __FILE__);
 }
 
 

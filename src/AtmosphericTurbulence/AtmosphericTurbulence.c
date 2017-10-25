@@ -346,6 +346,12 @@ int_fast8_t AtmosphericTurbulence_Test_LinPredictor_cli()
 
 
 
+void __attribute__ ((constructor)) libinit_AtmosphericTurbulence()
+{
+	init_AtmosphericTurbulence();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
 int init_AtmosphericTurbulence()
 {
     strcpy(data.module[data.NBmodule].name, __FILE__);

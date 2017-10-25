@@ -54,7 +54,7 @@ int clock_gettime(int clk_id, struct mach_timespec *t) {
 
 #include "CLIcore.h"
 #include "COREMOD_memory/COREMOD_memory.h"
-
+#include "00CORE/00CORE.h"
 
 
 
@@ -75,12 +75,23 @@ extern DATA data;
 
 
 
+
 /* =============================================================================================== */
 /* =============================================================================================== */
 /*                                    MODULE INITIALIZATION                                        */
 /* =============================================================================================== */
 /* =============================================================================================== */
 /** @name Module initialization */
+
+
+void __attribute__ ((constructor)) libinit_00CORE()
+{
+	init_00CORE();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
 
 int init_00CORE()
 {

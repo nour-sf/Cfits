@@ -93,6 +93,16 @@ int_fast8_t statistic_putgaussnoise_cli()
 /** @name Module initialization */
 
 
+void __attribute__ ((constructor)) libinit_statistic()
+{
+	init_statistic();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
+
+
 int_fast8_t init_statistic()
 {
   strcpy(data.module[data.NBmodule].name, __FILE__);

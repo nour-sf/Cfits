@@ -240,6 +240,13 @@ int_fast8_t AtmosphereModel_Create_from_CONF_cli()
 }
 
 
+
+void __attribute__ ((constructor)) libinit_AtmosphereModel()
+{
+	init_AtmosphereModel();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
 int_fast8_t init_AtmosphereModel()
 {
     strcpy(data.module[data.NBmodule].name, __FILE__);

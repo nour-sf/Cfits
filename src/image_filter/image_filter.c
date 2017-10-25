@@ -63,6 +63,19 @@ int_fast8_t fconvolve_cli()
 
 
 
+
+
+
+void __attribute__ ((constructor)) libinit_image_filter()
+{
+	init_image_filter();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
+
+
 int init_image_filter()
 {
   strcpy(data.module[data.NBmodule].name, __FILE__);

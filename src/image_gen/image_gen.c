@@ -190,6 +190,19 @@ int_fast8_t image_gen_im2coord_cli(){
 
 
 
+
+
+void __attribute__ ((constructor)) libinit_image_gen()
+{	
+	init_image_gen();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
+
+
+
+
 int_fast8_t init_image_gen()
 {
   strcpy(data.module[data.NBmodule].name, __FILE__);

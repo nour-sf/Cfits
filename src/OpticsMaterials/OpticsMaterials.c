@@ -8,6 +8,13 @@
 
 
 
+void __attribute__ ((constructor)) libinit_OpticsMaterials()
+{
+	init_OpticsMaterials();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
 int init_OpticsMaterials()
 {
 return(0);

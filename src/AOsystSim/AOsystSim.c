@@ -171,6 +171,14 @@ int_fast8_t AOsystSim_FPWFS_sensitivityAnalysis_cli(){
 
 
 
+
+void __attribute__ ((constructor)) libinit_AOsystSim()
+{
+	init_AOsystSim();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
+
 int init_AOsystSim()
 {
     strcpy(data.module[data.NBmodule].name, __FILE__);

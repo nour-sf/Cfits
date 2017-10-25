@@ -63,6 +63,15 @@ int_fast8_t ZERNIKEPOLYN_rmPiston_cli()
 
 
 
+//
+// attribute ((constructor)) : function executed when shared library loaded
+//
+void __attribute__ ((constructor)) libinit_ZernikePolyn()
+{
+	init_ZernikePolyn();
+	printf(" ...... Loading module %s\n", __FILE__);
+}
+
 
 
 
