@@ -1832,17 +1832,10 @@ static int_fast8_t load_module_shared(char *modulename)
 static int_fast8_t load_module_shared_ALL()
 {
     char libname[200];
-    char modulenameLC[200];
-    char c;
-    int n;
-    int (*libinitfunc) ();
     char *error;
-    char initfuncname[200];
-    
     char dirname[200];
     DIR           *d;
     struct dirent *dir;
-
     int iter;
     int loopOK;
     int itermax;
@@ -1850,8 +1843,8 @@ static int_fast8_t load_module_shared_ALL()
     sprintf(dirname, "%s/../lib", SOURCEDIR);
 
     loopOK = 0;
-    iter = 0;
-    itermax=4;
+    iter = 0;    
+    itermax=4;   // number of passes
     while ((loopOK == 0)&&(iter<itermax))
     {
 		loopOK = 1;
@@ -1895,34 +1888,6 @@ static int_fast8_t load_module_shared_ALL()
 		printf("All libraries successfully loaded\n");
 
 
-/*
-    sprintf(modulenameLC, "%s", modulename);
-    
-    for(n=0; n<strlen(modulenameLC); n++)
-    {
-        c = modulenameLC[n];
-        modulenameLC[n] = tolower(c);
-    }
-
-	
-
-    sprintf(libname, "%s/../lib/lib%s.so", SOURCEDIR, modulenameLC);
-    printf("libname = %s\n", libname);
-
-
-    printf("[%5d] Loading shared object \"%s\"\n", DLib_index, libname);
-
-
-    DLib_handle[DLib_index] = dlopen(libname, RTLD_LAZY);
-    if (!DLib_handle[DLib_index]) {
-        fprintf(stderr, "%s\n", dlerror());
-    }
-	else
-	{
-		dlerror();
-		DLib_index ++;
-	}
-	*/
     return 0;
 }
 
